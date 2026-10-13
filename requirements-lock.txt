@@ -1,0 +1,4 @@
+playwright==1.63.0
+openai==3.26.0
+pydantic==2.13.5
+socksio==1.0.0

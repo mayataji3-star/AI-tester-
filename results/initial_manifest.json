@@ -1,0 +1,15 @@
+{
+  "config.json": "6267d9f4cec446e53120703b852928abe9d2ae7b4ab55ad0d4d0709624acecee",
+  "docs/ai_instructions.txt": "897f08cf7fe6953675a1dc8d98056e7078eeeb362335c2973c71b726a7a78723",
+  "docs/model_review.md": "0950ca137fa09f087293db0ab27741cbbe16b9516ea37afcf8d9d8c8c4e94c3a",
+  "docs/report_review.csv": "bf8a9bd9e1c7fa407195436f4a8337fa04238b2fa40ba1b01ec1cc2820f8be62",
+  "docs/requirements.md": "8f29c2a710987e302e70d4f9abed37319bb5da3d22a31f9a58de7f14bdaef5fc",
+  "docs/scoring.md": "c48131ed3077d2ca4ee03329541bea1bb5cea5428d45cbcb3a054b5d83ccbef2",
+  "docs/tasks.json": "e351abf37005b4d7759e5b3fcf78cc44b3d20852231b80f9cd626ac851cee79b",
+  "docs/trainer_message.txt": "1f05ad194882b878251c993ce1102313b5d997703ef8bc4677b42f99489f6ea0",
+  "requirements-lock.txt": "c23083fbec5c1a1d041431dc76f25de17ec1423de9a280281cfc7eadfe6be16a",
+  "tester/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tester/agent.py": "02c2ec6783bfeec387eca62d0ebe87b74b342ba2ccf42747b55685365ddc1ec1",
+  "tester/browser.py": "75a20087c73d797a15e36899de1bafa257b732799f46dfe820b95c0e0b860213",
+  "tester/scripted.py": "7a4f29db2761bfcda9d7b3827eeed5ffa45edd7c89d517a54dc75e5a29976d1a"
+}

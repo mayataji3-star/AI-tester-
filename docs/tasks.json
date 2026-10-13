@@ -1,0 +1,18 @@
+[
+  {
+    "id": "search",
+    "instruction": "Search for \" HEAD \" and verify only Headphones is shown. Search for \"zzzz\" and verify the no-results message."
+  },
+  {
+    "id": "cart",
+    "instruction": "Add Headphones twice and Mouse once. Check quantities and total. Change Headphones quantity to 3 and verify the total. Remove Mouse and verify the total."
+  },
+  {
+    "id": "quantity",
+    "instruction": "Add Headphones. Attempt quantities 0, -1, and 1.5; each must retain the old quantity. Set quantity to 2 and verify subtotal and total."
+  },
+  {
+    "id": "checkout",
+    "instruction": "Try checkout on an empty cart with a valid synthetic email. Add Mouse; try an invalid email, then a valid email. Verify invalid submission fails, successful checkout confirms and empties the cart."
+  }
+]

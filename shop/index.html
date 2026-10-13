@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>MiniShop — local test ground</title>
+<style>body{font:16px system-ui;background:#f4f6fa;color:#182338;max-width:900px;margin:40px auto;padding:20px}header{display:flex;justify-content:space-between;align-items:center}section,article{background:white;padding:20px;border-radius:12px;margin:15px 0}button{background:#224c9d;color:white;border:0;border-radius:6px;padding:10px;cursor:pointer}input{padding:10px;margin:8px}article{border:1px solid #ddd}#products{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}table{width:100%;text-align:left}small{color:#566}</style>
+<header><h1>MiniShop</h1><small>Local testing • synthetic data</small></header>
+<section><h2>Find a product</h2><label for="search">Search products</label><input id="search" type="search"><div id="products"></div><p id="empty" hidden>No products found.</p></section>
+<section><h2>Your cart</h2><table><thead><tr><th>Product</th><th>Quantity</th><th>Subtotal</th><th>Action</th></tr></thead><tbody id="cart"></tbody></table><p id="total" role="status">Total: £0.00</p></section>
+<section><h2>Simulated checkout</h2><form id="checkout"><label for="email">Email address</label><input id="email" type="email" required><button type="submit">Place demo order</button></form><p id="message" role="status"></p></section>
+<script>
+const products=[{id:'headphones',name:'Headphones',cents:2000},{id:'keyboard',name:'Keyboard',cents:3000},{id:'mouse',name:'Mouse',cents:1000}];
+let cart={};const money=n=>'£'+(n/100).toFixed(2);
+function renderProducts(){let q=document.querySelector('#search').value.toLowerCase().trim();let found=products.filter(p=>p.name.toLowerCase().includes(q));document.querySelector('#products').innerHTML=found.map(p=>`<article><h3>${p.name}</h3><p>${money(p.cents)}</p><button aria-label="Add ${p.name} to cart" onclick="add('${p.id}')">Add to cart</button></article>`).join('');document.querySelector('#empty').hidden=found.length>0;}
+function add(id){cart[id]=(cart[id]||0)+1;renderCart();}
+function remove(id){delete cart[id];renderCart();}
+function quantity(id,input){let n=Number(input.value);if(!Number.isInteger(n)||n<1||n>99){input.value=cart[id];return;}cart[id]=n;renderCart();}
+function renderCart(){let total=0;document.querySelector('#cart').innerHTML=products.filter(p=>cart[p.id]).map(p=>{let subtotal=p.cents*cart[p.id];total+=subtotal;return `<tr><td>${p.name}</td><td><input aria-label="Quantity for ${p.name}" type="number" min="1" max="99" value="${cart[p.id]}" onchange="quantity('${p.id}',this)"></td><td>${money(subtotal)}</td><td><button aria-label="Remove ${p.name}" onclick="remove('${p.id}')">Remove</button></td></tr>`;}).join('');document.querySelector('#total').textContent='Total: '+money(total);}
+document.querySelector('#search').addEventListener('input',renderProducts);
+document.querySelector('#checkout').addEventListener('submit',e=>{e.preventDefault();let msg=document.querySelector('#message');if(!Object.keys(cart).length){msg.textContent='Your cart is empty.';return;}msg.textContent='Demo order placed. No payment taken.';cart={};renderCart();});renderProducts();
+</script></html>
