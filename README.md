@@ -1,4 +1,4 @@
-# AI Website Tester — week 1 starter
+# AI Website Tester — Gemini edition
 
 A small local synthetic shop, four scripted browser tasks, and an AI agent that chooses browser actions from accessible page structure. No deliberately planted bugs are included yet. This is a programming project to run on your computer, not a hosted website.
 
@@ -19,15 +19,26 @@ py -m venv .venv
 ```
 Scripted reports, screenshots, and traces go under `results/runs/`. A failed check is a candidate requiring manual reproduction, not automatically a confirmed bug. `python -m playwright show-trace PATH` opens a trace.
 
-## AI setup — after trainer review
-Send `docs/trainer_message.txt` and `docs/model_review.md` to your trainer. After review, set `trainer_reviewed` to `true` in `config.json`. API inference is remote; the shop and browser remain local. A ChatGPT subscription is not an API credential or API credit.
+## AI setup — Gemini Developer API
+The active provider is now **Google Gemini**, default model `gemini-3.5-flash-lite`. This uses the Gemini Developer API (AI Studio key), not Vertex AI. If your trainer specifies another accessible Gemini model, update `model` in config.json before running. Record that change for the experiment.
 
-Set your own API key locally in PowerShell (do not commit it or send it in chat), then run:
+No review flag is required. The adapter uses Python's standard library; your existing installed project dependencies are sufficient. Existing Groq adapter tests are retained as historical regression checks, but the agent never falls back to Groq or OpenAI.
+
+1. Keep the local shop running in one terminal.
+2. In a second PowerShell terminal, set the Gemini key locally:
+
 ```powershell
-$env:OPENAI_API_KEY = 'YOUR_API_KEY'
-.\.venv\Scripts\python.exe -m tester.agent --repeats 1
+$env:GEMINI_API_KEY = 'YOUR_GEMINI_KEY'
+.\.venv\Scripts\python.exe -m tester.agent --task cart --repeats 1
 ```
-This is a DEVELOPMENT run. After freezing the testers and receiving trainer-planted evaluation variants, use `--repeats 5`. API calls may incur charges. Start with one run, check usage, and agree a budget with your trainer. The key is never included in reports.
+
+Never put the real key in source files, commits, or chat. `.env` is ignored but not automatically loaded. If a credential was disclosed, use a replacement from its owner. Do not reuse `GROQ_API_KEY` for a Gemini key.
+
+Reports are saved under `results/runs/ai-gemini-.../run-1/cart/`. The search and cart verifiers still check actual UI outcomes. `finished` alone is not a passing result. Other tasks still need independent checks or manual verification.
+
+Gemini has its own per-project rate and quota limits; changing provider does not guarantee uninterrupted runs. The code sends one request at a time, spaces requests according to config.json (30 seconds by default), and stops on a quota error. It does not automatically retry, change model, enable billing, or use a paid fallback. **Billing depends on the trainer's Google project**: a model with a free tier is not proof that every key uses the free tier. Keep the project on the free tier if spending must be zero.
+
+The browser visits only the local synthetic shop; the model request goes to Google's remote API and contains synthetic visible text. No database access is used. Do not compare Gemini development timings directly with earlier Groq timings as if they were the same model. Freeze one provider/model/config before the final blind evaluation.
 
 ## What is ready
 - Search, quantity changes, cart totals, remove-item, and simulated checkout.
@@ -37,7 +48,7 @@ This is a DEVELOPMENT run. After freezing the testers and receiving trainer-plan
 - Effort CSV and prewritten scoring rules. Log YOUR active time from now; no historical authoring time has been invented.
 
 ## What has NOT happened
-No real-model AI run without a key; no main experiments before trainer review; no blind evaluation and no bug-detection claims. Offline agent tests use fixed decisions solely to test browser/report plumbing.
+Live Gemini inference has not been verified in this environment; no blind evaluation and no bug-detection claims. Offline agent tests use fixed decisions solely to test browser/report plumbing.
 
 ## Next stages
 1. Trainer reviews tools; run one AI development task on the healthy shop.

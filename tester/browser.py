@@ -20,6 +20,23 @@ class Browser:
         self.page.reload()
     def snapshot(self):
         return self.page.locator('body').aria_snapshot()
+    def search_state(self):
+        return {
+            'query': self.page.get_by_role('searchbox', name='Search products', exact=True).input_value(),
+            'product_names': self.page.locator('#products article:visible h3').all_text_contents(),
+            'no_results_visible': self.page.get_by_text('No products found.', exact=True).is_visible(),
+        }
+    def cart_state(self):
+        rows=[]
+        for row in self.page.locator('#cart tr:visible').all():
+            cells=row.locator('td')
+            field=row.get_by_role('spinbutton')
+            rows.append({
+                'product': cells.nth(0).inner_text().strip() if cells.count()>0 else None,
+                'quantity': field.input_value() if field.count()==1 and field.is_visible() else None,
+                'subtotal': cells.nth(2).inner_text().strip() if cells.count()>2 else None,
+            })
+        return {'rows': rows, 'total': self.page.locator('#total').inner_text().strip()}
     def action(self,a):
         if a['action']=='finish':return
         if a['action'] not in ('click','fill','press'):raise ValueError('Action not permitted')

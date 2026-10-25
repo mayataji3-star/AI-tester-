@@ -1,3 +1,4 @@
-playwright>=1.49,<2
-openai>=3.26,<4
+playwright>=1.63,<2
+groq>=0.37,<2
 pydantic>=2,<3
+socksio>=1,<2
