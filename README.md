@@ -64,3 +64,6 @@ Live Gemini inference has not been verified in this environment; no blind evalua
 Reports retain wall-clock `elapsed_seconds` and add `timing.request_wait_seconds`, `api_request_seconds`, `api_requests`, and `execution_seconds_excluding_request_wait`. Execution includes browser work, screenshots, model response latency and report preparation; it is not CPU time or human authoring time. Waiting is measured, including before a failed API request. The 300-second task budget still includes waiting. Google ErrorInfo reason codes (for example SERVICE_DISABLED) appear in the console error and report `reason_code`; raw error bodies and credentials are excluded.
 
 Record human writing and updating time separately in docs/effort_log.csv. Start a timer before editing scripts or AI instructions and stop when done; split categories and exclude breaks. Leave unknown historical times blank rather than estimate them as measured. Freeze provider, model, prompt and configuration before blind evaluation.
+
+## All four task completion checks
+Quantity and checkout now require independent checks of executed actions and observed page results. See docs/quantity_checkout_verification.md. Existing historical reports are preserved. Extra evidence screenshots count toward execution time.

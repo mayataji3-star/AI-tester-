@@ -6,6 +6,8 @@ from .browser import Browser
 from .gemini_provider import GeminiAPIError
 from .search_verifier import SearchVerifier
 from .cart_verifier import CartVerifier
+from .quantity_verifier import QuantityVerifier
+from .checkout_verifier import CheckoutVerifier
 ROOT=Path(__file__).resolve().parents[1]
 class Bug(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -30,6 +32,8 @@ def run_task(task,decide,out,config):
     report={'task':task,'engine':'ai','config':config,'claims':[]}
     search_verifier=SearchVerifier() if task.get('id')=='search' else None
     cart_verifier=CartVerifier() if task.get('id')=='cart' else None
+    action_verifier = {'quantity': QuantityVerifier, 'checkout': CheckoutVerifier}.get(task.get('id'))
+    action_verifier = action_verifier() if action_verifier else None
     try:
         with Browser() as b:
             for i in range(config['max_steps']):
@@ -60,8 +64,24 @@ def run_task(task,decide,out,config):
                     final = d
                     status = 'finished'
                     break
-                try:b.action(d)
-                except Exception as e:entry['tool_error']=type(e).__name__+': '+str(e)
+                before = None
+                if action_verifier is not None:
+                    before = b.checkout_state() if task['id'] == 'checkout' else b.cart_state()
+                try:
+                    b.action(d)
+                except Exception as e:
+                    entry['tool_error'] = type(e).__name__+': '+str(e)
+                    if isinstance(action_verifier, QuantityVerifier):
+                        action_verifier.pending = None
+                else:
+                    if action_verifier is not None:
+                        after = b.checkout_state() if task['id'] == 'checkout' else b.cart_state()
+                        evidence_file = f'after-{i:02d}.png'
+                        b.page.screenshot(path=str(out/evidence_file), full_page=True)
+                        action_verifier.record(d, before, after, evidence_file)
+                        entry['observed_before'] = before
+                        entry['observed_after'] = after
+                        entry['after_screenshot'] = evidence_file
             b.page.screenshot(path=str(out/'final.png'),full_page=True)
     except TimeoutError:
         status='timeout';report['error']='Task time budget exhausted.'
@@ -114,6 +134,11 @@ def run_task(task,decide,out,config):
         report['independent_checks'] = verification
         report['task_completed'] = bool(final and final['task_completed'] and verification['passed'])
         report['completion_verification'] = 'verified_cart_outcomes' if report['task_completed'] else 'not_verified'
+    elif action_verifier is not None:
+        verification = action_verifier.result()
+        report['independent_checks'] = verification
+        report['task_completed'] = bool(final and final['task_completed'] and verification['passed'])
+        report['completion_verification'] = ('verified_'+task['id']+'_outcomes') if report['task_completed'] else 'not_verified'
     else:
         report['completion_verification'] = 'model_claim_only'
     (out/'report.json').write_text(json.dumps(report,indent=2), encoding='utf-8')

@@ -37,6 +37,16 @@ class Browser:
                 'subtotal': cells.nth(2).inner_text().strip() if cells.count()>2 else None,
             })
         return {'rows': rows, 'total': self.page.locator('#total').inner_text().strip()}
+    def checkout_state(self):
+        state = self.cart_state()
+        field = self.page.get_by_role('textbox', name='Email address', exact=True)
+        state.update(field.evaluate("""element => ({
+            email: element.value,
+            email_valid: element.validity.valid,
+            email_type_mismatch: element.validity.typeMismatch
+        })"""))
+        state['message'] = self.page.locator('#message').inner_text().strip()
+        return state
     def action(self,a):
         if a['action']=='finish':return
         if a['action'] not in ('click','fill','press'):raise ValueError('Action not permitted')
