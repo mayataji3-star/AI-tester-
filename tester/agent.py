@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Literal
 from pydantic import BaseModel, ConfigDict
 from .browser import Browser
+from .gemini_provider import GeminiAPIError
 from .search_verifier import SearchVerifier
 from .cart_verifier import CartVerifier
 ROOT=Path(__file__).resolve().parents[1]
@@ -25,6 +26,7 @@ class Decision(BaseModel):
 def run_task(task,decide,out,config):
     out.mkdir(parents=True,exist_ok=True)
     started=time.monotonic();history=[];usage=[];status='step_limit';final=None
+    timing_start = dict(getattr(decide, 'timing', {}))
     report={'task':task,'engine':'ai','config':config,'claims':[]}
     search_verifier=SearchVerifier() if task.get('id')=='search' else None
     cart_verifier=CartVerifier() if task.get('id')=='cart' else None
@@ -66,7 +68,14 @@ def run_task(task,decide,out,config):
     except Exception as e:
         # Never put API response bodies, request headers, or credentials in reports.
         error_type=type(e).__name__
-        if error_type=='RateLimitError':
+        if isinstance(e, GeminiAPIError):
+            status = 'rate_limited' if error_type == 'RateLimitError' else 'provider_error'
+            report['error'] = str(e)
+            for field in ('http_status', 'retry_after_seconds', 'reason_code'):
+                value = getattr(e, field, None)
+                if value is not None:
+                    report[field] = value
+        elif error_type=='RateLimitError':
             status='rate_limited';report['error']=config.get('provider','AI').capitalize()+' quota reached. Wait or reduce runs; no paid fallback was attempted.'
             if getattr(e,'retry_after_seconds',None) is not None:
                 report['retry_after_seconds']=e.retry_after_seconds
@@ -85,6 +94,15 @@ def run_task(task,decide,out,config):
     report.update(status=status,elapsed_seconds=round(time.monotonic()-started,3),history=history,usage=usage,
         task_completed=bool(final and final['task_completed']),summary=final['summary'] if final else '',
         claims=[dict(x,verification='pending',evidence='final.png') for x in final['bugs']] if final else [])
+    totals = getattr(decide, 'timing', {})
+    timing_delta = {name: totals.get(name, 0) - timing_start.get(name, 0)
+                    for name in ('request_wait_seconds', 'api_request_seconds', 'api_requests')}
+    elapsed = time.monotonic() - started
+    report['elapsed_seconds'] = round(elapsed, 3)
+    report['timing'] = {
+        **{name: round(value, 3) for name, value in timing_delta.items()},
+        'execution_seconds_excluding_request_wait': round(max(0, elapsed - timing_delta['request_wait_seconds']), 3),
+    }
     report['model_claimed_completed'] = bool(final and final['task_completed'])
     if search_verifier is not None:
         verification = search_verifier.result()

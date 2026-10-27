@@ -20,7 +20,7 @@ class GeminiAdapter(unittest.TestCase):
         calls=[]
         def sender(req,timeout):
             calls.append(req)
-            self.assertEqual(req.full_url,'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent')
+            self.assertEqual(req.full_url,'https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-3.5-flash-lite:generateContent')
             self.assertNotIn('offline-placeholder',req.full_url)
             self.assertEqual(req.get_header('X-goog-api-key'),'offline-placeholder')
             body=json.loads(req.data)

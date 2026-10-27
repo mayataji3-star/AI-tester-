@@ -1,15 +1,13 @@
 # Gemini replacement model
 
-Provider: Google Gemini Developer API using a locally set GEMINI_API_KEY. Default model: gemini-3.5-flash-lite. This model is currently listed with a free tier; actual access, billing and quotas depend on the trainer's project. No Vertex AI setup or Google Cloud login is attempted. No key is included in source files.
+Provider: Google Vertex AI express mode. Model: `gemini-3.5-flash-lite`, matching config.json and the trainer's endpoint/model correction on 2026-10-25. Authentication: locally set GEMINI_API_KEY sent only in x-goog-api-key.
 
-Browser: Playwright 1.63.0 / Chromium. Reads accessible structure; keeps screenshots as evidence. Local browser requests and the existing action allowlist are unchanged. Search and cart outcomes are verified against observed page state. This change does not make an AI claim proof of success.
+Endpoint: https://aiplatform.googleapis.com/v1/publishers/google/models/{model}:generateContent
 
-The adapter uses the Generate Content REST endpoint, JSON-schema output, and local Pydantic validation. It records the configured model, returned model version, request ID, and usage counts. Invalid, blocked or truncated responses execute no action. HTTP 429 is recorded as rate_limited; a safe retry delay is recorded when supplied. No automatic fallback or retries. The program cannot determine the key's billing plan, so the key owner must keep its project on a free plan for zero spending.
+Playwright 1.63.0 / Chromium reads accessible page structure and retains screenshots. Browser requests remain restricted to the local synthetic shop. Search and cart outcomes require independent page-state verification.
 
-The earlier Groq and initial OpenAI results remain historical evidence. New Gemini runs are a separate development condition; do not blend model results. Keep the same tasks and freeze the selected provider/model/settings before the trainer plants final bugs. No artificial defects are introduced by this migration.
+Generate Content REST requests use JSON-schema output and strict local Pydantic validation. No SDK, automatic model fallback, retry or billing change is introduced. The trainer controls account access, free allowance and billing; the program cannot establish them from the key. Request spacing is 1 second between starts, with actual waiting recorded separately from API duration and execution. Task wall time remains capped at 300 seconds including waits.
 
-References checked for this update:
-https://ai.google.dev/gemini-api/docs/pricing
-https://ai.google.dev/gemini-api/docs/deprecations
-https://ai.google.dev/gemini-api/docs/generate-content/structured-output
-https://ai.google.dev/api/generate-content
+HTTP status, retry delay and a sanitized Google ErrorInfo reason code are retained, including on failed requests. Raw error messages/bodies and keys are not logged. No live Vertex run has been verified here. Keep Vertex development results separate from historical Groq runs.
+
+Reference: https://docs.cloud.google.com/vertex-ai/generative-ai/docs/start/express-mode/vertex-ai-express-mode-api-reference

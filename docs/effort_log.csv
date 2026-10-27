@@ -1,1 +1,2 @@
 date,category,task,active_minutes,notes
+2026-10-25,ai_provider_update,"Vertex endpoint/model correction; timing and error diagnostics",,"AI-assisted implementation; historical human writing time was not measured. Leave blank rather than invent minutes; begin timing future script and prompt edits separately."

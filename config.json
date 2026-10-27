@@ -1,9 +1,9 @@
 {
- "model": "gemini-2.5-flash",
+  "model": "gemini-3.5-flash-lite",
   "temperature": 0.2,
   "max_steps": 30,
   "timeout_seconds": 300,
   "provider": "gemini",
-  "request_interval_seconds": 30,
+  "request_interval_seconds": 1,
   "max_completion_tokens": 2048
 }

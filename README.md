@@ -19,8 +19,8 @@ py -m venv .venv
 ```
 Scripted reports, screenshots, and traces go under `results/runs/`. A failed check is a candidate requiring manual reproduction, not automatically a confirmed bug. `python -m playwright show-trace PATH` opens a trace.
 
-## AI setup — Gemini Developer API
-The active provider is now **Google Gemini**, default model `gemini-3.5-flash-lite`. This uses the Gemini Developer API (AI Studio key), not Vertex AI. If your trainer specifies another accessible Gemini model, update `model` in config.json before running. Record that change for the experiment.
+## AI setup — Vertex AI express mode
+The active provider is now **Google Gemini**, default model `gemini-3.5-flash-lite`. This uses the Vertex AI express-mode endpoint with an express-mode key in the `x-goog-api-key` header. If your trainer specifies another accessible Gemini model, update `model` in config.json before running. Record that change for the experiment.
 
 No review flag is required. The adapter uses Python's standard library; your existing installed project dependencies are sufficient. Existing Groq adapter tests are retained as historical regression checks, but the agent never falls back to Groq or OpenAI.
 
@@ -36,7 +36,7 @@ Never put the real key in source files, commits, or chat. `.env` is ignored but 
 
 Reports are saved under `results/runs/ai-gemini-.../run-1/cart/`. The search and cart verifiers still check actual UI outcomes. `finished` alone is not a passing result. Other tasks still need independent checks or manual verification.
 
-Gemini has its own per-project rate and quota limits; changing provider does not guarantee uninterrupted runs. The code sends one request at a time, spaces requests according to config.json (30 seconds by default), and stops on a quota error. It does not automatically retry, change model, enable billing, or use a paid fallback. **Billing depends on the trainer's Google project**: a model with a free tier is not proof that every key uses the free tier. Keep the project on the free tier if spending must be zero.
+Gemini has its own per-project rate and quota limits; changing provider does not guarantee uninterrupted runs. The code sends one request at a time, spaces requests according to config.json (1 second between request starts by default), and stops on a quota error. It does not automatically retry, change model, enable billing, or use a paid fallback. **Billing depends on the trainer's Google project**: a model with a free tier is not proof that every key uses the free tier. The trainer must confirm the key remains within its free allowance if spending must be zero.
 
 The browser visits only the local synthetic shop; the model request goes to Google's remote API and contains synthetic visible text. No database access is used. Do not compare Gemini development timings directly with earlier Groq timings as if they were the same model. Freeze one provider/model/config before the final blind evaluation.
 
@@ -59,3 +59,8 @@ Live Gemini inference has not been verified in this environment; no blind evalua
 6. Run frozen testers from resets, verify claims, and compute quality AND effort comparisons.
 
 `docs/scoring.md` defines planted matching, duplicates, unexpected real bugs, false claims, and infrastructure failures. Model completion claims do not prove task completion; independently validate outcomes.
+
+## Timing and provider diagnostics
+Reports retain wall-clock `elapsed_seconds` and add `timing.request_wait_seconds`, `api_request_seconds`, `api_requests`, and `execution_seconds_excluding_request_wait`. Execution includes browser work, screenshots, model response latency and report preparation; it is not CPU time or human authoring time. Waiting is measured, including before a failed API request. The 300-second task budget still includes waiting. Google ErrorInfo reason codes (for example SERVICE_DISABLED) appear in the console error and report `reason_code`; raw error bodies and credentials are excluded.
+
+Record human writing and updating time separately in docs/effort_log.csv. Start a timer before editing scripts or AI instructions and stop when done; split categories and exclude breaks. Leave unknown historical times blank rather than estimate them as measured. Freeze provider, model, prompt and configuration before blind evaluation.
